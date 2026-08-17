@@ -32,24 +32,36 @@ export type StoredContactMessage = {
 };
 
 export async function insertContactMessage(data: ContactInput): Promise<StoredContactMessage> {
-  const { data: row, error } = await getPublicClient()
-    .from("contact_messages")
-    .insert({
-      first_name: data.firstName,
-      last_name: data.lastName,
-      email: data.email,
-      subject: data.subject,
-      message: data.message,
-    })
-    .select("id, first_name, last_name, email, subject, message, created_at")
-    .single();
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
 
-  if (error || !row) {
-    throw new Error(error?.message ?? "Enregistrement impossible");
+  // Visitors write as the anonymous role, which may insert but never read back,
+  // so we generate the row identity here instead of using `.select()`.
+  const { error } = await getPublicClient().from("contact_messages").insert({
+    id,
+    first_name: data.firstName,
+    last_name: data.lastName,
+    email: data.email,
+    subject: data.subject,
+    message: data.message,
+    created_at: createdAt,
+  });
+
+  if (error) {
+    throw new Error(error.message);
   }
 
-  return row as StoredContactMessage;
+  return {
+    id,
+    first_name: data.firstName,
+    last_name: data.lastName,
+    email: data.email,
+    subject: data.subject,
+    message: data.message,
+    created_at: createdAt,
+  };
 }
+
 
 /**
  * Sends the internal notification for a new contact request.
