@@ -48,6 +48,7 @@ export async function insertContactMessage(data: ContactInput): Promise<StoredCo
   });
 
   if (error) {
+    console.error("[contact] insert error", JSON.stringify(error), "url", process.env["SUPABASE_URL"], "keyPrefix", (process.env["SUPABASE_PUBLISHABLE_KEY"]??"").slice(0,14));
     throw new Error(error.message);
   }
 
