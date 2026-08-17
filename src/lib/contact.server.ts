@@ -1,25 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 import type { ContactInput } from "./contact.functions";
 
 export const NOTIFICATION_RECIPIENT = "justebyrne@gmail.com";
-
-function getPublicClient() {
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-  return createClient<Database>(process.env["SUPABASE_URL"]!, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input, init) => {
-        const headers = new Headers(init?.headers);
-        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) {
-          headers.delete("Authorization");
-        }
-        headers.set("apikey", key);
-        return fetch(input, { ...init, headers });
-      },
-    },
-  });
-}
 
 export type StoredContactMessage = {
   id: string;
@@ -31,38 +12,43 @@ export type StoredContactMessage = {
   created_at: string;
 };
 
+/**
+ * Stores a contact request through the Data API as the anonymous role.
+ * The anonymous role may insert but never read, so the row identity is
+ * generated here instead of relying on a returning select.
+ */
 export async function insertContactMessage(data: ContactInput): Promise<StoredContactMessage> {
-  const id = crypto.randomUUID();
-  const createdAt = new Date().toISOString();
+  const url = process.env["SUPABASE_URL"]!;
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
 
-  // Visitors write as the anonymous role, which may insert but never read back,
-  // so we generate the row identity here instead of using `.select()`.
-  const { error } = await getPublicClient().from("contact_messages").insert({
-    id,
+  const row: StoredContactMessage = {
+    id: crypto.randomUUID(),
     first_name: data.firstName,
     last_name: data.lastName,
     email: data.email,
     subject: data.subject,
     message: data.message,
-    created_at: createdAt,
+    created_at: new Date().toISOString(),
+  };
+
+  const response = await fetch(`${url}/rest/v1/contact_messages`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(row),
   });
 
-  if (error) {
-    console.error("[contact] insert error", JSON.stringify(error), "url", process.env["SUPABASE_URL"], "keyPrefix", (process.env["SUPABASE_PUBLISHABLE_KEY"]??"").slice(0,14));
-    throw new Error(error.message);
+  if (!response.ok) {
+    const body = await response.text();
+    console.error(`[contact] insert failed [${response.status}]: ${body}`);
+    throw new Error("Enregistrement impossible");
   }
 
-  return {
-    id,
-    first_name: data.firstName,
-    last_name: data.lastName,
-    email: data.email,
-    subject: data.subject,
-    message: data.message,
-    created_at: createdAt,
-  };
+  return row;
 }
-
 
 /**
  * Sends the internal notification for a new contact request.
@@ -71,11 +57,7 @@ export async function insertContactMessage(data: ContactInput): Promise<StoredCo
  */
 export async function notifyNewContactMessage(row: StoredContactMessage): Promise<boolean> {
   try {
-    const mod = (await import("./email-notification.server").catch(() => null)) as {
-      sendContactNotification?: (row: StoredContactMessage) => Promise<boolean>;
-    } | null;
-
-    if (!mod?.sendContactNotification) return false;
+    const mod = await import("./email-notification.server");
     return await mod.sendContactNotification(row);
   } catch (error) {
     console.error("[contact] notification failed", error);
