@@ -4,11 +4,8 @@ import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { ContactSection } from "@/components/site/ContactSection";
 import { SecurityNotice } from "@/components/site/SecurityNotice";
+import { GiftBoxes } from "@/components/site/GiftBoxes";
 import heroImage from "@/assets/hero.jpg";
-import lotHorizon from "@/assets/lot-horizon.jpg";
-import lotSignature from "@/assets/lot-signature.jpg";
-import lotSupport250 from "@/assets/lot-support-250.jpg";
-import lotSupport170 from "@/assets/lot-support-170.jpg";
 
 const title = "Northstar Selection · Une sélection qui compte";
 const description =
