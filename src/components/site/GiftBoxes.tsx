@@ -2,6 +2,12 @@ import { useCallback, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { revealGift } from "@/lib/gifts.functions";
 
 type Prize = {
@@ -87,6 +93,7 @@ export function GiftBoxes() {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   const onPick = useCallback(
     async (index: number) => {
@@ -98,6 +105,8 @@ export function GiftBoxes() {
         const result = (await reveal({ data: { boxIndex: index } })) as Prize;
         setPrize(result);
         setImage(await loadImage(result.imageKey));
+        // Laisse l'animation d'ouverture jouer avant d'afficher la popup
+        setTimeout(() => setPopupOpen(true), 900);
       } catch {
         setError("Une erreur est survenue. Rechargez la page pour réessayer.");
       } finally {
@@ -155,6 +164,70 @@ export function GiftBoxes() {
           );
         })}
       </div>
+
+      {/* Popup de félicitations */}
+      <Dialog open={popupOpen} onOpenChange={setPopupOpen}>
+        <DialogContent className="max-w-md overflow-hidden border-gold/40 bg-card p-0 sm:rounded-3xl">
+          <DialogTitle className="sr-only">Félicitations</DialogTitle>
+          <DialogDescription className="sr-only">
+            Vous avez gagné un lot. Consultez les détails ci-dessous.
+          </DialogDescription>
+
+          {/* Bandeau doré de félicitations */}
+          <div
+            className="flex flex-col items-center px-6 py-8 text-center"
+            style={{ background: "var(--gradient-gold)" }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold-foreground/80">
+              Northstar Selection
+            </p>
+            <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl leading-tight text-gold-foreground sm:text-4xl">
+              🎉 Félicitations à vous ! 🎉
+            </h2>
+            <p className="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-gold-foreground/90">
+              Vous avez gagné
+            </p>
+          </div>
+
+          {/* Détail du lot */}
+          <div className="space-y-4 p-6">
+            {image ? (
+              <img
+                src={image}
+                alt={prize?.title ?? "Lot gagné"}
+                loading="lazy"
+                className="h-44 w-full rounded-2xl object-cover shadow-soft"
+              />
+            ) : null}
+            <div>
+              <span className="eyebrow">{prize?.tag} · Votre lot</span>
+              <h3 className="mt-2 font-[family-name:var(--font-display)] text-2xl leading-snug text-foreground">
+                {prize?.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {prize?.text}
+              </p>
+            </div>
+            <p className="rounded-xl bg-sand px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+              Ce lot reste indicatif et dépend de l'admissibilité et des conditions
+              applicables. Aucun paiement n'est requis pour le réclamer.
+            </p>
+            <div className="flex flex-col gap-3 pt-1 sm:flex-row">
+              <Button asChild variant="ink" className="flex-1 rounded-full">
+                <a href="#contact">Réclamer ce lot</a>
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                className="flex-1 rounded-full"
+                onClick={() => setPopupOpen(false)}
+              >
+                Fermer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {prize ? (
         <div className="mt-10 overflow-hidden rounded-2xl border border-border bg-card shadow-lift sm:flex">
