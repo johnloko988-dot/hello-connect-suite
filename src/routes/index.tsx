@@ -145,46 +145,16 @@ function Index() {
         <section id="lots" className="scroll-mt-24 py-24">
           <div className="mx-auto max-w-6xl px-6">
             <p className="eyebrow">01 / La sélection</p>
-            <h2 className="mt-4 text-4xl text-foreground sm:text-5xl">Choisissez avec attention</h2>
+            <h2 className="mt-4 text-4xl text-foreground sm:text-5xl">Choisissez une boîte</h2>
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Les visuels présentent les lots de manière indicative. La sélection finale dépend de
-              l'admissibilité et des conditions applicables.
+              Quatre boîtes fermées, un seul choix. Touchez celle qui vous inspire pour l'ouvrir. Le
+              lot révélé reste indicatif et dépend de l'admissibilité et des conditions applicables.
             </p>
 
-            <div className="mt-12 grid gap-8 sm:grid-cols-2">
-              {lots.map((lot) => (
-                <article
-                  key={lot.index}
-                  className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
-                >
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img
-                      src={lot.image}
-                      alt={lot.alt}
-                      loading="lazy"
-                      width={1200}
-                      height={900}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                    />
-                  </div>
-                  <div className="space-y-3 p-7">
-                    <div className="flex items-center gap-3">
-                      <span className="font-[family-name:var(--font-display)] text-2xl text-gold">
-                        {lot.index}
-                      </span>
-                      <span className="eyebrow">{lot.tag}</span>
-                    </div>
-                    <h3 className="text-2xl text-foreground">{lot.title}</h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{lot.text}</p>
-                    <Button asChild variant="quiet" className="mt-2 rounded-full">
-                      <a href="#contact">Choisir ce lot</a>
-                    </Button>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <GiftBoxes />
           </div>
         </section>
+
 
         {/* Procédure */}
         <section
