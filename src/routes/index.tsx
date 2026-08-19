@@ -28,40 +28,8 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const lots = [
-  {
-    index: "01",
-    tag: "Mobilité",
-    title: "Tesla 2026 · Horizon",
-    text: "Une mobilité électrique pensée pour demain, sobre et lumineuse.",
-    image: lotHorizon,
-    alt: "Berline électrique blanche stationnée dans une lumière matinale douce",
-  },
-  {
-    index: "02",
-    tag: "Mobilité",
-    title: "Tesla 2026 · Signature",
-    text: "Une autre vision de la conduite électrique, plus affirmée.",
-    image: lotSignature,
-    alt: "Berline électrique graphite sur une route côtière à l'heure dorée",
-  },
-  {
-    index: "03",
-    tag: "Soutien",
-    title: "250 000 $",
-    text: "Un soutien financier majeur pour ouvrir un nouveau chapitre.",
-    image: lotSupport250,
-    alt: "Composition abstraite crème traversée d'une lumière dorée",
-  },
-  {
-    index: "04",
-    tag: "Soutien",
-    title: "170 000 $",
-    text: "Une contribution pensée pour faire avancer vos projets.",
-    image: lotSupport170,
-    alt: "Composition abstraite ivoire et vert sauge avec arcs dorés",
-  },
-];
+
+
 
 const steps = [
   { n: "01", label: "Explorez les quatre lots", text: "Prenez le temps de comparer la sélection." },
